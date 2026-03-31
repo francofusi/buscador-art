@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import unicodedata
-from geopy.geocoders import Nominatim
-from geopy.extra.rate_limiter import RateLimiter
+from geopy.geocoders import ArcGIS  # <-- MAGIA: Traemos el satélite nuevo
 import requests
 import time
 import folium
@@ -77,11 +76,10 @@ tipo_red = st.radio(
 if st.button("Buscar Clínicas Cercanas"):
     if direccion:
         with st.spinner('Buscando señal satelital y calculando rutas de calle...'):
-            geolocator = Nominatim(user_agent="buscador_art_francoramirofusi@gmail.com")
             
-            # MAGIA NUEVA: El freno automático para que no nos bloqueen
-            geocode_con_pausa = RateLimiter(geolocator.geocode, min_delay_seconds=2, error_wait_seconds=5)
-            location = geocode_con_pausa(direccion)
+            # MAGIA: Usamos ArcGIS que es a prueba de balas y no pide usuario
+            geolocator = ArcGIS()
+            location = geolocator.geocode(direccion, timeout=10)
             
             if location:
                 lat_accidente = location.latitude
