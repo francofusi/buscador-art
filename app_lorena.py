@@ -81,9 +81,9 @@ if st.button("Buscar Clínicas Cercanas"):
     if direccion:
         with st.spinner('Buscando señal satelital y calculando rutas de calle...'):
            geolocator = Nominatim(user_agent="buscador_art_francoramirofusi@gmail.com")
-location = geolocator.geocode(direccion, timeout=10)
+           location = geolocator.geocode(direccion, timeout=10)
             
-if location:
+            if location:
                 lat_accidente = location.latitude
                 lon_accidente = location.longitude
                 
