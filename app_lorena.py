@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import unicodedata
 from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 import requests
 import time
 import folium
@@ -77,7 +78,10 @@ if st.button("Buscar Clínicas Cercanas"):
     if direccion:
         with st.spinner('Buscando señal satelital y calculando rutas de calle...'):
             geolocator = Nominatim(user_agent="buscador_art_francoramirofusi@gmail.com")
-            location = geolocator.geocode(direccion, timeout=10)
+            
+            # MAGIA NUEVA: El freno automático para que no nos bloqueen
+            geocode_con_pausa = RateLimiter(geolocator.geocode, min_delay_seconds=2, error_wait_seconds=5)
+            location = geocode_con_pausa(direccion)
             
             if location:
                 lat_accidente = location.latitude
