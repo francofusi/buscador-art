@@ -161,7 +161,7 @@ if st.button("Buscar Clínicas Cercanas"):
                     
                 else:
                     st.error(f"No se encontraron clínicas en la {tipo_red} para esa especialidad en esta zona.")
-            else:
+        else:
                 st.error("No pude encontrar la dirección. Intentá agregar la localidad, provincia y 'Argentina'.")
     else:
         st.warning("Por favor, ingresá una dirección antes de buscar.")
