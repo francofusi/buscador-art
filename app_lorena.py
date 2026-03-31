@@ -160,7 +160,7 @@ if st.button("Buscar Clínicas Cercanas"):
                     st_folium(m, width=700, height=500, returned_objects=[])
                     
                 m.fit_bounds(limites)
-                    st_folium(m, width=700, height=500, returned_objects=[])
+                st_folium(m, width=700, height=500, returned_objects=[])
                     
                 else:
                     st.error(f"No se encontraron clínicas en la {tipo_red} para esa especialidad en esta zona.")
