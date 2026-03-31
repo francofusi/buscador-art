@@ -20,19 +20,17 @@ def calcular_distancia_linea_recta(lat1, lon1, lat2, lon2):
     dlon = lon2 - lon1
     a = np.sin(dlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.0)**2
     c = 2 * np.arcsin(np.sqrt(a))
-    return 6371 * c 
+    return 6371 * c
 
-# AHORA TAMBIÉN NOS TRAEMOS EL DIBUJO DE LA RUTA (GEOJSON)
 def obtener_ruta_y_distancia(lat_origen, lon_origen, lat_destino, lon_destino):
     try:
-        # Le agregamos overview=full y geometries=geojson para que nos mande el trazado
         url = f"http://router.project-osrm.org/route/v1/driving/{lon_origen},{lat_origen};{lon_destino},{lat_destino}?overview=full&geometries=geojson"
         respuesta = requests.get(url, timeout=5)
         data = respuesta.json()
         
         if data.get('code') == 'Ok':
             distancia_km = data['routes'][0]['distance'] / 1000
-            geometria = data['routes'][0]['geometry'] # Acá viene el dibujo de la calle
+            geometria = data['routes'][0]['geometry']
             return distancia_km, geometria
         else:
             return None, None
@@ -41,7 +39,6 @@ def obtener_ruta_y_distancia(lat_origen, lon_origen, lat_destino, lon_destino):
 
 @st.cache_data 
 def cargar_datos():
-    # Ahora lee los archivos directamente en la carpeta donde está el programa
     df_prestadores = pd.read_csv('DIM_Prestadores.csv')
     df_especialidades = pd.read_csv('DIM_Especialidades.csv')
     df_fact_esp = pd.read_csv('FACT_Prestador_Especialidad.csv')
@@ -60,7 +57,6 @@ df_modelo = cargar_datos()
 st.title("🚑 Buscador Inteligente de ART")
 st.markdown("Ingresá los datos del trabajador para encontrar los prestadores más cercanos.")
 
-# Agregamos una barra lateral para las configuraciones de plata
 with st.sidebar:
     st.header("⚙️ Configuración de Viáticos")
     precio_km = st.number_input("Costo del KM en Remis ($):", min_value=0, value=850, step=50, help="Ingresá cuánto paga la ART por kilómetro.")
@@ -79,13 +75,13 @@ tipo_red = st.radio(
 
 if st.button("Buscar Clínicas Cercanas"):
     if direccion:
-            with st.spinner('Buscando señal satelital y calculando rutas de calle...'):
-                geolocator = Nominatim(user_agent="buscador_art_francoramirofusi@gmail.com")
-                location = geolocator.geocode(direccion, timeout=10)
-                
-                if location:
-                    lat_accidente = location.latitude
-                    lon_accidente = location.longitude
+        with st.spinner('Buscando señal satelital y calculando rutas de calle...'):
+            geolocator = Nominatim(user_agent="buscador_art_francoramirofusi@gmail.com")
+            location = geolocator.geocode(direccion, timeout=10)
+            
+            if location:
+                lat_accidente = location.latitude
+                lon_accidente = location.longitude
                 
                 especialidad_busqueda = limpiar_texto(especialidad)
                 mascara_esp = df_modelo['especialidad_limpia'].str.contains(especialidad_busqueda, case=False, na=False, regex=False)
@@ -124,14 +120,11 @@ if st.button("Buscar Clínicas Cercanas"):
                         color_red = "🟢" if row['red_tipo'] == "Red Principal" else "🟡"
                         color_icono = colores_podio[i]
                         
-                        # Calculamos la plata
                         costo_viaje = row['distancia_km_ruta'] * precio_km
                         
-                        # Armamos los links oficiales de Google Maps para que ruteen automático
                         link_bondi = f"https://www.google.com/maps/dir/?api=1&origin={lat_accidente},{lon_accidente}&destination={row['latitud']},{row['longitud']}&travelmode=transit"
                         link_auto = f"https://www.google.com/maps/dir/?api=1&origin={lat_accidente},{lon_accidente}&destination={row['latitud']},{row['longitud']}&travelmode=driving"
                         
-                        # Tarjeta de la clínica con solo las 2 opciones de traslado
                         st.info(f"🏥 **Opción {i+1}: {row['establecimiento_nombre']}** (Color Mapa: {color_icono.upper()})\n\n"
                                 f"🏢 **Tipo:** {color_red} {row['red_tipo']} | 📍 {row['domicilio']}, {row['localidad_nombre']}\n\n"
                                 f"🚗 **Distancia:** {row['distancia_km_ruta']:.2f} km\n\n"
@@ -139,7 +132,6 @@ if st.button("Buscar Clínicas Cercanas"):
                                 f"1️⃣ [🚌 Ver ruta en colectivo / tren]({link_bondi})\n\n"
                                 f"2️⃣ [🚕 Remis]({link_auto}) *(Costo est. un tramo: **${costo_viaje:,.2f}**)*")
                     
-                    # --- MAPA INTERACTIVO (Igual que antes, con el truco del parpadeo) ---
                     st.markdown("### 🗺️ Mapa de Rutas de Evacuación")
                     m = folium.Map(location=[lat_accidente, lon_accidente], zoom_start=14)
                     folium.Marker([lat_accidente, lon_accidente], popup="Accidente", icon=folium.Icon(color="red", icon="info-sign")).add_to(m)
@@ -158,17 +150,10 @@ if st.button("Buscar Clínicas Cercanas"):
 
                     m.fit_bounds(limites)
                     st_folium(m, width=700, height=500, returned_objects=[])
-
-                    m.fit_bounds(limites)
-                    st_folium(m, width=700, height=500, returned_objects=[])
                     
                 else:
                     st.error(f"No se encontraron clínicas en la {tipo_red} para esa especialidad en esta zona.")
-                    
             else:
                 st.error("No pude encontrar la dirección. Intentá agregar la localidad, provincia y 'Argentina'.")
-                
     else:
         st.warning("Por favor, ingresá una dirección antes de buscar.")
-                    
-               
