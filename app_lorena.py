@@ -79,13 +79,13 @@ tipo_red = st.radio(
 
 if st.button("Buscar Clínicas Cercanas"):
     if direccion:
-        with st.spinner('Buscando señal satelital y calculando rutas de calle...'):
-           geolocator = Nominatim(user_agent="buscador_art_francoramirofusi@gmail.com")
-           location = geolocator.geocode(direccion, timeout=10)
-            
-        if location:
-                lat_accidente = location.latitude
-                lon_accidente = location.longitude
+            with st.spinner('Buscando señal satelital y calculando rutas de calle...'):
+                geolocator = Nominatim(user_agent="buscador_art_francoramirofusi@gmail.com")
+                location = geolocator.geocode(direccion, timeout=10)
+                
+                if location:
+                    lat_accidente = location.latitude
+                    lon_accidente = location.longitude
                 
                 especialidad_busqueda = limpiar_texto(especialidad)
                 mascara_esp = df_modelo['especialidad_limpia'].str.contains(especialidad_busqueda, case=False, na=False, regex=False)
